@@ -298,7 +298,7 @@ fn start_server(rel_path: String) -> String {
 
                     let mut static_content = Vec::new();
 
-                    let mut file = File::open(&path).expect("Unable to open file");
+                    let mut file = File::open(&path).expect(&format!("Unable to open {}", path));
                     file.read_to_end(&mut static_content)
                         .expect("Unable to read");
 
