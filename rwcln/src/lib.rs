@@ -5,6 +5,7 @@
 extern crate mutils;
 
 mod structs;
+
 use structs::*;
 
 use serde_yml;
@@ -12,7 +13,8 @@ use serde_yml;
 use wasm_bindgen::prelude::*;
 use web_sys::{
     js_sys::{self, JsString},
-    Document, Element, HtmlInputElement, HtmlSelectElement, MessageEvent, WebSocket, Window,
+    window, Document, Element, HtmlInputElement, HtmlSelectElement, MessageEvent,
+    WebSocket, Window,
 };
 
 #[derive(Clone)]
@@ -79,6 +81,13 @@ impl Elem {
     fn on_input(&self, closure: Closure<dyn FnMut()>) {
         self.element
             .add_event_listener_with_callback("input", closure.as_ref().unchecked_ref())
+            .unwrap();
+        closure.forget();
+    }
+
+    fn on_blur(&self, closure: Closure<dyn FnMut()>) {
+        self.element
+            .add_event_listener_with_callback("blur", closure.as_ref().unchecked_ref())
             .unwrap();
         closure.forget();
     }
@@ -263,11 +272,12 @@ impl Elem {
                                 ip.add_websocket();
                                 let mut ip_clone = ip.clone();
                                 let oc_ip = Closure::<dyn FnMut()>::new(move || {
-                                    c_log("input");
+                                    //c_log("input");
                                     let value = ip_clone.value();
                                     ip_clone.ws_send(value);
                                 });
-                                ip.on_input(oc_ip);
+                                ip.on_change(oc_ip);
+                                //ip.on_blur(oc_ip);
                                 elems.push(ip);
                             }
 
