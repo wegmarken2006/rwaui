@@ -3,3 +3,7 @@
 /rwsrv/target
 /.zed
 /rwcln/pkg
+example/pkg/rwcln_bg.wasm
+example/pkg/rwcln_bg.wasm.d.ts
+example/pkg/rwcln.d.ts
+example/pkg/rwcln.js

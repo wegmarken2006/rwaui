@@ -6,7 +6,11 @@ fn main() {
     let h2 = get_elem("id_7");
     let mut bt = get_elem("id_2");
     let mut h2_clone = h2.clone();
-    bt.callback(move |_| h2_clone.set_inner_text("new header"));
+    bt.callback(move |_| {
+        h2_clone.set_inner_text("new header");
+        h2_clone.set_background_color("red");
+        h2_clone.set_color("white");
+    });
 
     let mut dd = get_elem("id_1");
     dd.callback(move |val| println!("dd val {}", val));

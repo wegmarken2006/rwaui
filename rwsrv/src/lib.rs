@@ -137,6 +137,19 @@ impl WsElem {
         tx_msg.text = text.to_string();
         self.send_message(tx_msg);
     }
+
+    pub fn set_background_color(&mut self, color: &str) {
+        let mut tx_msg = RxTxMessage::default();
+        tx_msg.backgroundcolor = color.to_string();
+        self.send_message(tx_msg);
+    }
+
+    pub fn set_color(&mut self, color: &str) {
+        let mut tx_msg = RxTxMessage::default();
+        tx_msg.color = color.to_string();
+        self.send_message(tx_msg);
+    }
+
 }
 
 pub fn init(yaml_name: &str) -> funrt!(&str, WsElem) {

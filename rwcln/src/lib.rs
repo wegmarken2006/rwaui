@@ -13,8 +13,8 @@ use serde_yml;
 use wasm_bindgen::prelude::*;
 use web_sys::{
     js_sys::{self, JsString},
-    window, Document, Element, HtmlInputElement, HtmlSelectElement, MessageEvent,
-    WebSocket, Window,
+    window, Document, Element, HtmlInputElement, HtmlSelectElement, MessageEvent, WebSocket,
+    Window,
 };
 
 #[derive(Clone)]
@@ -346,7 +346,7 @@ impl Elem {
     }
 
     fn ws_read(&mut self) {
-        let this = self.clone();
+        let mut this = self.clone();
         let ws: WebSocket = self.ws.clone().unwrap();
         let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
             if let Ok(abuf) = e.data().dyn_into::<js_sys::ArrayBuffer>() {
@@ -362,6 +362,12 @@ impl Elem {
                 };
                 if rx_msg.text.len() > 0 {
                     this.element.set_inner_html(&rx_msg.text);
+                }
+                if rx_msg.backgroundcolor.len() > 0 {
+                    this.set_background_color(&rx_msg.backgroundcolor);
+                }
+                if rx_msg.color.len() > 0 {
+                    this.set_color(&rx_msg.color);
                 }
             } else if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
                 c_log2(&txt);
@@ -565,9 +571,10 @@ impl DomCfg {
     }
 
     fn header2(&mut self, id: &str, text: &str) -> Elem {
-        let e = self.create_element(id, "h2");
-        e.element.set_inner_html(text);
-        e
+        let mut h2 = self.create_element(id, "h2");
+        h2.style = format!("{} text-align: center;", h2.style);
+        h2.element.set_inner_html(text);
+        h2
     }
 
     fn dropdown(&mut self, id: &str, choices: vt!(String), defaultind: usize) -> Elem {
