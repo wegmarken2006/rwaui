@@ -22,6 +22,9 @@ fn main() {
         h2_clone.set_color("white");
     });
 
+    let mut dt1 = get_elem("id_30");
+    dt1.callback(move |val| println!("dt1 val {}", val));
+
     let mut bt21 = get_elem("id_21");
     bt21.callback(move |val| println!("bt21 val {}", val));
 

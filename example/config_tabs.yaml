@@ -26,6 +26,9 @@
           - button:
               id: id_2
               text: press
+      - gridrow:
+          - date:
+              id: id_30
 - tab:
     id: id_31
     text: tab2

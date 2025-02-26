@@ -14,6 +14,12 @@ pub struct GridRowElement {
     pub p: Option<Paragraph>,
     pub canvas: Option<Canvas>,
     pub image: Option<Image>,
+    pub date: Option<Date>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub struct Date {
+    pub id: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]

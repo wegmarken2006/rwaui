@@ -247,6 +247,16 @@ pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
                     hms!(helems, id, ip);
                 }
 
+                if grid.date != None {
+                    let conf = grid.date.unwrap();
+                    let id = conf.id;
+                    let dt = WsElem {
+                        id: id.clone(),
+                        tx: None,
+                    };
+                    hms!(helems, id, dt);
+                }
+
                 if grid.slider != None {
                     let conf = grid.slider.unwrap();
                     let id = conf.id;

@@ -281,6 +281,20 @@ impl Elem {
                                 elems.push(ip);
                             }
 
+                            if grid.date != None {
+                                let dt_conf = grid.date.unwrap();
+                                let mut dt = dom.date(&dt_conf.id);
+                                dt.add_websocket();
+                                let mut dt_clone = dt.clone();
+                                let oc_dt = Closure::<dyn FnMut()>::new(move || {
+                                    let value = dt_clone.value();
+                                    dt_clone.ws_send(value);
+                                });
+                                dt.on_change(oc_dt);
+                                //ip.on_blur(oc_ip);
+                                elems.push(dt);
+                            }
+
                             if grid.slider != None {
                                 let sl_conf = grid.slider.unwrap();
                                 let mut sl = dom.slider(
@@ -524,6 +538,12 @@ impl DomCfg {
         if text.len() > 0 {
             e.element.set_attribute("placeholder", text).unwrap();
         }
+        e
+    }
+
+    fn date(&mut self, id: &str) -> Elem {
+        let e = self.create_element(id, "input");
+        e.element.set_attribute("type", "date").unwrap();
         e
     }
 
