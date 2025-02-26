@@ -1,4 +1,4 @@
-//// wasm-pack build --target web
+//// wasm-pack build --release --target web
 //// wasm-pack build --debug --target web
 
 #[macro_use]
@@ -23,6 +23,7 @@ struct DomCfg {
     doc: Document,
     id_count: i32,
     tabs: vt!(Elem),
+    debug: bool,
 }
 
 #[derive(Clone)]
@@ -135,7 +136,7 @@ impl Elem {
 
         let ws = web_sys::WebSocket::new(&addr).unwrap();
         ws.set_binary_type(web_sys::BinaryType::Arraybuffer);
-        c_log(&ws.url()); //TODO
+        //c_log(&ws.url());
         self.ws = Some(ws);
     }
 
@@ -144,7 +145,7 @@ impl Elem {
         let ws: WebSocket = self.ws.clone().unwrap();
         let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
             if let Ok(abuf) = e.data().dyn_into::<js_sys::ArrayBuffer>() {
-                c_log(&format!("message event, received arraybuffer: {:?}", abuf));
+                //c_log(&format!("message event, received arraybuffer: {:?}", abuf));
                 let array = js_sys::Uint8Array::new(&abuf);
                 /*
                 let len = array.byte_length() as usize;
@@ -272,7 +273,6 @@ impl Elem {
                                 ip.add_websocket();
                                 let mut ip_clone = ip.clone();
                                 let oc_ip = Closure::<dyn FnMut()>::new(move || {
-                                    //c_log("input");
                                     let value = ip_clone.value();
                                     ip_clone.ws_send(value);
                                 });
@@ -310,7 +310,6 @@ impl Elem {
                     }
                 }
             } else if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-                c_log2(&txt);
                 //console_log!("message event, received Text: {:?}", txt);
             } else {
                 //console_log!("message event, received Unknown: {:?}", e.data());
@@ -350,7 +349,7 @@ impl Elem {
         let ws: WebSocket = self.ws.clone().unwrap();
         let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
             if let Ok(abuf) = e.data().dyn_into::<js_sys::ArrayBuffer>() {
-                c_log(&format!("message event, received arraybuffer: {:?}", abuf));
+                //c_log(&format!("message event, received arraybuffer: {:?}", abuf));
                 let array = js_sys::Uint8Array::new(&abuf);
                 let yaml = array.to_vec();
                 let rx_msg: RxTxMessage = match serde_yml::from_slice(&yaml) {
@@ -476,6 +475,10 @@ impl DomCfg {
             .create_element(name)
             .expect(&format!("create {} error", name));
         element.set_id(&id_set);
+        if self.debug {
+            element.set_attribute("title", &id_set).unwrap();
+        }
+
         let this = self.clone();
         shareable!(this, dom_share);
         Elem {
@@ -681,6 +684,7 @@ fn main() -> Result<(), JsValue> {
         doc: document,
         id_count: 300,
         tabs: vec![],
+        debug: true,
     };
 
     let mut title = dom.title("id_0", "title");
@@ -689,80 +693,6 @@ fn main() -> Result<(), JsValue> {
     title.add_websocket();
     title.ws_read_conf();
 
-    //send to ackonwledge websocket ready
-    /*
-    for _ind in 0..10 {
-        if title.is_ws_open() {
-            c_log("6"); //prova
-            title.ws_send("title".into());
-            break;
-        } else {
-            std::thread::sleep(std::time::Duration::from_millis(50));
-        }
-    }
-    */
-
-    /*
-    // Manufacture the element we're gonna append
-    let p1 = dom.paragraph("id_1", "Hello from Rust!");
-
-    let h2 = dom.header2("id_2", "Hello from Rust!");
-    h2.set_background_color("green");
-
-    let r1 = dom.row("id_3");
-
-    let mut c1 = dom.col("id_4");
-    c1.set_multi_cols(3);
-
-    let c2 = dom.col("id_5");
-
-    let b1 = dom.button("id_1ì6", "press", "yellow");
-
-    let mut i1 = dom.input("id_7");
-    let i1_clone = i1.clone();
-
-    let mut i1_string = String::new();
-    let ic1 = Closure::<dyn FnMut()>::new(move || {
-        /* */
-        let value = i1_clone.value();
-
-        let vl = value.clone();
-        c_log(&vl);
-        /* */
-    });
-
-    //i1.on_input(ic1);
-    i1.on_keypress(ic1);
-
-    let f1 = dom.form("id_8");
-    let f1_clone = f1.clone();
-    let fc1 = Closure::<dyn FnMut()>::new(move || {
-        let value = f1_clone.value();
-
-        let vl = value.clone();
-        c_log(&vl);
-        /* */
-    });
-    f1.on_submit(fc1);
-
-    // Add click event listener to the button
-    let h2_clone = h2.clone();
-    let bc1 = Closure::<dyn FnMut()>::new(move || {
-        h2_clone.set_background_color("blue");
-    });
-
-    b1.on_click(bc1);
-
-    c1.append(&h2);
-    c1.append(&p1);
-    c2.append(&b1);
-    c2.append(&i1);
-    c2.append(&f1);
-    r1.append(&c1);
-    r1.append(&c2);
-
-    body.append_child(&r1.element)?;
-    */
 
     Ok(())
 }

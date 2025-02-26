@@ -9,7 +9,7 @@
               id:
           - h2:
               id: id_7
-              text: header3
+              text: header2
               mutable: true
           - p:
               id:

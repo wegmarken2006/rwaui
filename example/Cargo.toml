@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 rwsrv = { path = "../rwsrv" }
 #rwsrv = { git = "https://github.com/wegmarken2006/rwaui" }
+web-view = "*"

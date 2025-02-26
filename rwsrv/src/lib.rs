@@ -152,7 +152,7 @@ impl WsElem {
 
 }
 
-pub fn init(yaml_name: &str) -> funrt!(&str, WsElem) {
+pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
     let mut f = File::open(yaml_name).expect(&format!("File {} not found", yaml_name));
 
     vi!(buf, u8);
@@ -273,7 +273,7 @@ pub fn init(yaml_name: &str) -> funrt!(&str, WsElem) {
     });
     */
 
-    return move |id| helems[id].clone();
+    return (addr, move |id| helems[id].clone());
 }
 
 fn start_server(rel_path: String) -> String {
@@ -303,7 +303,7 @@ fn start_server(rel_path: String) -> String {
             let wasm_type = "Content-Type: application/wasm\r\n";
 
             let strs: Vec<&str> = http_request[0].split_whitespace().collect();
-            println!("{:?}", strs); //prova
+            println!("{:?}", strs);
             if strs[0] == "GET" {
                 let head = &format!("/{}/", rel_path);
                 if strs[1].starts_with(head) {
@@ -361,9 +361,8 @@ fn start_server(rel_path: String) -> String {
     });
 
     let addr_str = format!("http://{:?}", addr);
-    println!("Serving on {}", addr_str);
+
     return addr_str;
-    //return format!("ws://{:?}", addr);
 }
 
 pub fn wait_key_from_console() {
