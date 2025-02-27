@@ -20,9 +20,9 @@
               id: id_1
               defaultind: 1
               items:
-                - uno
-                - due
-                - tre
+                #- uno
+                #- due
+                #- tre
           - button:
               id: id_2
               text: press

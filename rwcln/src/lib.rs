@@ -32,7 +32,8 @@ struct Elem {
     style: String,
     child_1: Option<Element>,
     parent: Option<Box<Elem>>,
-    ws: Option<WebSocket>,
+    ws_rx: Option<WebSocket>,
+    ws_tx: Option<WebSocket>,
     dom: sharet!(DomCfg),
 }
 
@@ -49,6 +50,29 @@ impl Elem {
     fn set_color(&mut self, color: &str) {
         self.style = format!("{} color: {};", &self.style, color);
         self.element.set_attribute("style", &self.style).unwrap();
+    }
+
+    fn set_list(&mut self, list: vt!(String)) {
+
+        sharegc!((self.dom), dom);
+        let defaultind = 0;
+        let op1 = dom.create_element("", "option");
+        if list.len() > 0 {
+            self.element
+                .set_attribute("aria-label", &list[defaultind])
+                .unwrap();
+            op1.element.set_inner_html(&list[defaultind]);
+        }
+        self.element.append_child(&op1.element).unwrap();
+        for_enum!(ind, choice, list, {
+            if ind == defaultind {
+                continue;
+            } else {
+                let op = dom.create_element("", "option");
+                op.element.set_inner_html(&choice);
+                self.element.append_child(&op.element).unwrap();
+            }
+        });
     }
 
     fn on_click(&self, closure: Closure<dyn FnMut()>) {
@@ -122,13 +146,8 @@ impl Elem {
             .value();
     }
 
-    fn add_websocket(&mut self) {
+    fn add_websocket_rx(&mut self) {
         let id = self.element.get_attribute("id").unwrap();
-        //let window = web_sys::window().expect("no global `window` exists");
-        //let location = window.location();
-        //let host = location.hostname().unwrap();
-        //let port = location.port().unwrap();
-        //let addr = format!(r#"ws://{}:{}/{}"#, host, port, id);
 
         let id_num_s = id.split_once("id_").unwrap().1;
         let id_num = id_num_s.parse::<u8>().unwrap();
@@ -137,12 +156,25 @@ impl Elem {
         let ws = web_sys::WebSocket::new(&addr).unwrap();
         ws.set_binary_type(web_sys::BinaryType::Arraybuffer);
         //c_log(&ws.url());
-        self.ws = Some(ws);
+        self.ws_rx = Some(ws);
+    }
+
+    fn add_websocket_tx(&mut self) {
+        let id = self.element.get_attribute("id").unwrap();
+
+        let id_num_s = id.split_once("id_").unwrap().1;
+        let id_num = id_num_s.parse::<u8>().unwrap();
+        let addr = format!(r#"ws://127.0.0.1:62{:0>3}"#, id_num);
+
+        let ws = web_sys::WebSocket::new(&addr).unwrap();
+        ws.set_binary_type(web_sys::BinaryType::Arraybuffer);
+        //c_log(&ws.url());
+        self.ws_tx = Some(ws);
     }
 
     fn ws_read_conf(&mut self) {
         let this = self.clone();
-        let ws: WebSocket = self.ws.clone().unwrap();
+        let ws: WebSocket = self.ws_rx.clone().unwrap();
         let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
             if let Ok(abuf) = e.data().dyn_into::<js_sys::ArrayBuffer>() {
                 //c_log(&format!("message event, received arraybuffer: {:?}", abuf));
@@ -196,7 +228,7 @@ impl Elem {
                                 let h2_conf = grid.h2.unwrap();
                                 let mut h2 = dom.header2(&h2_conf.id, &h2_conf.text);
                                 if h2_conf.mutable {
-                                    h2.add_websocket();
+                                    h2.add_websocket_rx();
                                     h2.ws_read();
                                 }
                                 elems.push(h2);
@@ -206,7 +238,7 @@ impl Elem {
                                 let ta_conf = grid.textarea.unwrap();
                                 let mut ta =
                                     dom.textarea(&ta_conf.id, ta_conf.lines, &ta_conf.text);
-                                ta.add_websocket();
+                                ta.add_websocket_rx();
                                 ta.ws_read();
                                 elems.push(ta);
                             }
@@ -215,7 +247,7 @@ impl Elem {
                                 let lb_conf = grid.label.unwrap();
                                 let mut lb = dom.label(&lb_conf.id, &lb_conf.text);
                                 if lb_conf.mutable {
-                                    lb.add_websocket();
+                                    lb.add_websocket_rx();
                                     lb.ws_read();
                                 }
                                 elems.push(lb);
@@ -241,7 +273,9 @@ impl Elem {
                                     dd_conf.items,
                                     dd_conf.defaultind as usize,
                                 );
-                                dd.add_websocket();
+                                dd.add_websocket_rx();
+                                dd.ws_read();
+                                dd.add_websocket_tx();
                                 let mut dd_clone = dd.clone();
                                 let oc_dd = Closure::<dyn FnMut()>::new(move || {
                                     let value = dd_clone.select_value();
@@ -254,7 +288,7 @@ impl Elem {
                             if grid.button != None {
                                 let bt_conf = grid.button.unwrap();
                                 let mut bt = dom.button(&bt_conf.id, &bt_conf.text);
-                                bt.add_websocket();
+                                bt.add_websocket_tx();
                                 let mut bt_clone = bt.clone();
                                 let oc_bt = Closure::<dyn FnMut()>::new(move || {
                                     bt_clone.ws_send("pressed".to_string());
@@ -270,7 +304,7 @@ impl Elem {
                                     text = ip_conf.text.unwrap();
                                 }
                                 let mut ip = dom.input(&ip_conf.id, &text);
-                                ip.add_websocket();
+                                ip.add_websocket_tx();
                                 let mut ip_clone = ip.clone();
                                 let oc_ip = Closure::<dyn FnMut()>::new(move || {
                                     let value = ip_clone.value();
@@ -284,7 +318,7 @@ impl Elem {
                             if grid.date != None {
                                 let dt_conf = grid.date.unwrap();
                                 let mut dt = dom.date(&dt_conf.id);
-                                dt.add_websocket();
+                                dt.add_websocket_tx();
                                 let mut dt_clone = dt.clone();
                                 let oc_dt = Closure::<dyn FnMut()>::new(move || {
                                     let value = dt_clone.value();
@@ -303,7 +337,7 @@ impl Elem {
                                     sl_conf.minmaxini[1],
                                     sl_conf.minmaxini[2],
                                 );
-                                sl.add_websocket();
+                                sl.add_websocket_tx();
                                 let mut sl_clone = sl.clone();
                                 let oc_sl = Closure::<dyn FnMut()>::new(move || {
                                     let value = sl_clone.value();
@@ -360,7 +394,7 @@ impl Elem {
 
     fn ws_read(&mut self) {
         let mut this = self.clone();
-        let ws: WebSocket = self.ws.clone().unwrap();
+        let ws: WebSocket = self.ws_rx.clone().unwrap();
         let onmessage_callback = Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
             if let Ok(abuf) = e.data().dyn_into::<js_sys::ArrayBuffer>() {
                 //c_log(&format!("message event, received arraybuffer: {:?}", abuf));
@@ -382,6 +416,11 @@ impl Elem {
                 if rx_msg.color.len() > 0 {
                     this.set_color(&rx_msg.color);
                 }
+                if rx_msg.list.len() > 0 {
+                    this.set_list(rx_msg.list);
+                }
+
+                
             } else if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
                 c_log2(&txt);
                 //console_log!("message event, received Text: {:?}", txt);
@@ -404,19 +443,9 @@ impl Elem {
         onerror_callback.forget();
     }
 
-    fn is_ws_open(&mut self) -> bool {
-        let ws: WebSocket = self.ws.clone().unwrap();
-        let status = ws.ready_state();
-        if status != 1 {
-            return false;
-        } else {
-            // WebSocket.OPEN
-            return true;
-        }
-    }
-
+    
     fn ws_send(&mut self, message: String) {
-        let ws: WebSocket = self.ws.clone().unwrap();
+        let ws: WebSocket = self.ws_tx.clone().unwrap();
         ws.send_with_u8_array(message.as_bytes()).unwrap();
     }
 
@@ -500,7 +529,8 @@ impl DomCfg {
             style: "".to_string(),
             child_1: None,
             parent: None,
-            ws: None,
+            ws_rx: None,
+            ws_tx: None,
             dom: dom_share,
         }
     }
@@ -710,7 +740,7 @@ fn main() -> Result<(), JsValue> {
     let mut title = dom.title("id_0", "title");
     body.append_child(&title.element).unwrap();
 
-    title.add_websocket();
+    title.add_websocket_rx();
     title.ws_read_conf();
 
 

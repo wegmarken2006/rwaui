@@ -117,6 +117,7 @@ pub struct RxTxMessage {
     pub backgroundcolor: String,
     pub color: String,
     pub imagename: String,
+    pub list: vt!(String),
 }
 
 impl Default for RxTxMessage {
@@ -127,6 +128,7 @@ impl Default for RxTxMessage {
             backgroundcolor: "".to_string(),
             color: "".to_string(),
             imagename: "".to_string(),
+            list: vec![]
         }
     }
 }

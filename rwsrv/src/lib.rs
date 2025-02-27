@@ -1,3 +1,5 @@
+#![feature(fn_traits)]
+
 #[macro_use]
 extern crate mutils;
 
@@ -22,12 +24,12 @@ impl Default for WsElem {
     fn default() -> WsElem {
         WsElem {
             id: "".to_string(),
-            tx: None,
+            tx: None,      
         }
     }
 }
 impl WsElem {
-    fn attach(&mut self, f: funt!(String)) {
+    fn attach(&mut self) {
         uchani!(tx1, rx1, vt!(u8));
         shareable!(tx1, stx1);
         self.tx = Some(stx1);
@@ -39,8 +41,9 @@ impl WsElem {
             .expect(&format!("error binding to {}", &addr));
         let addr = ws_listener.local_addr().unwrap().clone();
 
-        //println!("URL {}", addr);
+        //println!("attach URL {}", addr);
 
+        let this = self.clone();
         std::thread::spawn(move || {
             for stream in ws_listener.incoming() {
                 let stream = stream.unwrap();
@@ -72,7 +75,7 @@ impl WsElem {
             .expect(&format!("error binding to {}", &addr));
         let addr = ws_listener.local_addr().unwrap().clone();
 
-        //println!("URL {}", addr);
+        //println!("attach_tx URL {}", addr);
 
         std::thread::spawn(move || {
             for stream in ws_listener.incoming() {
@@ -89,15 +92,17 @@ impl WsElem {
         });
     }
 
+    
     pub fn callback(&mut self, mut f: funmt!(String)) {
         let id_num_s = self.id.split_once("id_").unwrap().1;
         let id_num = id_num_s.parse::<u8>().unwrap();
-        let addr = format!(r#"127.0.0.1:61{:0>3}"#, id_num);
+        let addr = format!(r#"127.0.0.1:62{:0>3}"#, id_num);
+
         let ws_listener = std::net::TcpListener::bind(addr.clone())
             .expect(&format!("error binding to {}", &addr));
-        //let addr = ws_listener.local_addr().unwrap().clone();
 
-        //println!("URL {}", addr);
+        //let addr = ws_listener.local_addr().unwrap().clone();
+        //println!("Callback URL {}", addr);
 
         std::thread::spawn(move || {
             for stream in ws_listener.incoming() {
@@ -150,6 +155,12 @@ impl WsElem {
         self.send_message(tx_msg);
     }
 
+    pub fn set_list(&mut self, list: vt!(String)) {
+        let mut tx_msg = RxTxMessage::default();
+        tx_msg.list = list;
+        self.send_message(tx_msg);
+    }
+
 }
 
 pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
@@ -160,11 +171,9 @@ pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
 
     let yaml = buf.to_vec();
 
-    let mut title = WsElem {
-        id: "id_0".to_string(),
-        tx: None,
-    };
-    title.attach(move |message| println!("{}", message));
+    let mut title = WsElem::default();
+    title.id = "id_0".to_string();
+    title.attach();
     title.send(buf);
 
     let gui_descr: vt!(GuiDescr) = match serde_yml::from_slice(&yaml) {
@@ -183,10 +192,8 @@ pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
                 if grid.h2 != None {
                     let conf = grid.h2.unwrap();
                     let id = conf.id;
-                    let mut h2 = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut h2 = WsElem::default();
+                    h2.id = id.clone();
                     if conf.mutable {
                         h2.attach_tx();
                     }
@@ -196,10 +203,8 @@ pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
                 if grid.textarea != None {
                     let conf = grid.textarea.unwrap();
                     let id = conf.id;
-                    let mut ta = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut ta = WsElem::default();
+                    ta.id = id.clone();
                     ta.attach_tx();
                     hms!(helems, id, ta);
                 }
@@ -207,10 +212,8 @@ pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
                 if grid.label != None {
                     let conf = grid.label.unwrap();
                     let id = conf.id;
-                    let mut lb = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut lb = WsElem::default();
+                    lb.id = id.clone();
                     if conf.mutable {
                         lb.attach_tx();
                     }
@@ -220,50 +223,41 @@ pub fn init(yaml_name: &str) -> (String, funrt!(&str, WsElem)) {
                 if grid.dropdown != None {
                     let conf = grid.dropdown.unwrap();
                     let id = conf.id;
-                    let dd = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut dd = WsElem::default(); 
+                    dd.id = id.clone();
+                    dd.attach(); //write and read
                     hms!(helems, id, dd);
                 }
 
                 if grid.button != None {
                     let conf = grid.button.unwrap();
                     let id = conf.id;
-                    let bt = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut bt = WsElem::default();
+                    bt.id = id.clone();
                     hms!(helems, id, bt);
                 }
 
                 if grid.input != None {
                     let conf = grid.input.unwrap();
                     let id = conf.id;
-                    let ip = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut ip = WsElem::default();
+                    ip.id = id.clone();
                     hms!(helems, id, ip);
                 }
 
                 if grid.date != None {
                     let conf = grid.date.unwrap();
                     let id = conf.id;
-                    let dt = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut dt = WsElem::default();
+                    dt.id = id.clone();
                     hms!(helems, id, dt);
                 }
 
                 if grid.slider != None {
                     let conf = grid.slider.unwrap();
                     let id = conf.id;
-                    let sl = WsElem {
-                        id: id.clone(),
-                        tx: None,
-                    };
+                    let mut sl = WsElem::default();
+                    sl.id = id.clone();
                     hms!(helems, id, sl);
                 }
             }

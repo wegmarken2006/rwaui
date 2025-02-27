@@ -29,6 +29,8 @@ fn main() {
     bt21.callback(move |val| println!("bt21 val {}", val));
 
     let mut dd = get_elem("id_1");
+    let list = vec!["one".to_string(), "two".to_string(), "three".to_string()];
+    dd.set_list(list);
     dd.callback(move |val| println!("dd val {}", val));
 
     let mut sl = get_elem("id_4");
