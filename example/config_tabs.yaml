@@ -1,0 +1,73 @@
+- tab:
+    id: id_30
+    text: tab1
+    rows:
+      - gridrow:
+          - p:
+              id:
+          - p:
+              id:
+          - h2:
+              id: id_7
+              text: header2
+              mutable: true
+          - p:
+              id:
+          - p:
+              id:
+      - gridrow:
+          - dropdown:
+              id: id_1
+              defaultind: 1
+              items:
+                #- uno
+                #- due
+                #- tre
+          - button:
+              id: id_2
+              text: press
+      - gridrow:
+          - date:
+              id: id_30
+- tab:
+    id: id_31
+    text: tab2
+    rows:
+      - gridrow:
+          - input:
+              id: id_3
+              text: submit
+          - slider:
+              id: id_4
+              minmaxini:
+                - 10
+                - 100
+                - 30
+          - label:
+              id: id_6
+              text: "30"
+              mutable: true
+      - gridrow:
+          - textarea:
+              id: id_5
+              text: ">>>"
+              lines: 10
+- tab:
+    id: id_200
+    text: tab3
+    rows:
+      - gridrow:
+          - p:
+              id:
+          - button:
+              id: id_21
+              text: draw
+          - p:
+              id:
+      - gridrow:
+          - p:
+              id:
+          - plot:
+              id: id_40
+          - p:
+              id:

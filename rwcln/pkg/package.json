@@ -1,0 +1,15 @@
+{
+  "name": "rwcln",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "rwcln_bg.wasm",
+    "rwcln.js",
+    "rwcln.d.ts"
+  ],
+  "main": "rwcln.js",
+  "types": "rwcln.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

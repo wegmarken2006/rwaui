@@ -1,0 +1,13 @@
+[package]
+name = "rwsrv"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mutils = { git = "https://github.com/wegmarken2006/mutils" }
+serde = "1.0.217"
+serde_derive = "1.0.217"
+serde_yml = "0.0.12"
+tungstenite = "0.20"
+crossbeam-channel = "0.5.14"
+#webview_app = "1.2.1"
