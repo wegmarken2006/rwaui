@@ -111,7 +111,9 @@ impl WsElem {
                         std::process::exit(0);
                     });
                     //println!("WS received from {}: {}", &addr, &msg.to_string());
-                    f(msg.to_string());
+                    if msg.len() > 0 {
+                        f(msg.to_string());
+                    }
                 }
             }
         });
