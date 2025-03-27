@@ -6,6 +6,7 @@ extern crate mutils;
 
 mod structs;
 
+use serde::Deserialize;
 use structs::*;
 
 use serde_yml;
@@ -22,7 +23,7 @@ use web_sys::{
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = Plotly, js_name = newPlot)]
-    fn new_plot(el: Element, data: &JsValue);
+    fn new_plot(el: Element, data: &JsValue, layout: &JsValue);
 }
 
 #[derive(Clone)]
@@ -435,8 +436,8 @@ impl Elem {
                     this.set_list(rx_msg.list);
                 }
                 if rx_msg.plot_conf != None {
-                    let plot_conf = rx_msg.plot_conf.unwrap();
-                    this.draw_plot(&plot_conf);
+                    let mut plot_conf = rx_msg.plot_conf.unwrap();
+                    this.draw_plot(&mut plot_conf);
                 }
             } else if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
                 c_log2(&txt);
@@ -522,12 +523,102 @@ impl Elem {
         }
     }
 
-    fn draw_plot(&mut self, plt_conf: &PlotConf) {
-        let jpdata = serde_wasm_bindgen::to_value(plt_conf).unwrap();
+    fn draw_plot(&mut self, plt_conf: &mut PlotConf) {
+        #[derive(serde::Serialize)]
+        struct PltLineConf {
+            pub x: vt!(f64),
+            pub y: vt!(f64),
+            pub name: String,
+            pub mode: String,
+            pub r#type: String,
+        }
+
+        #[derive(serde::Serialize)]
+        struct PltBarConf {
+            pub x: vt!(String),
+            pub y: vt!(f64),
+            pub name: String,
+            pub mode: String,
+            pub r#type: String,
+        }
+
+        #[derive(serde::Serialize)]
+        struct PltBoxConf {
+            pub y: vt!(f64),
+            pub name: String,
+            pub mode: String,
+            pub r#type: String,
+        }
+
+        #[derive(serde::Serialize)]
+        struct PltLayout {
+            pub title: String,
+            pub width: i64,
+            pub height: i64,
+        }
+
+        if plt_conf.r#type == "scatter" {
+            plt_conf.mode = "markers".to_string();
+        } else if plt_conf.r#type == "lines" {
+            plt_conf.mode = "lines".to_string();
+            plt_conf.r#type = "scatter".to_string();
+        } else if plt_conf.r#type == "bar" {
+            plt_conf.mode = "s".to_string();
+        } else if plt_conf.r#type == "box" {
+            plt_conf.mode = "".to_string();
+        }
 
         let data = js_sys::Array::new();
-        data.push(&jpdata);
-        new_plot(self.clone().element, &data);
+
+        //let ys = plt_conf.y.clone();
+        let title = plt_conf.title.clone();
+        let names = plt_conf.names.clone();
+        for ind in 0..plt_conf.y.len() {
+            let p_conf = plt_conf.clone();
+            let name = &names[ind];
+            let y = &plt_conf.y[ind];
+            if plt_conf.r#type == "bar" {
+                let pline_conf = PltBarConf {
+                    x: p_conf.x_cat,
+                    y: (*y).clone().to_vec(),
+                    r#type: p_conf.r#type,
+                    name: name.to_string(),
+                    mode: p_conf.mode,
+                };
+
+                let jpdata = serde_wasm_bindgen::to_value(&pline_conf).unwrap();
+                data.push(&jpdata);
+            } else if plt_conf.r#type == "box" {
+                let pline_conf = PltBoxConf {
+                    y: (*y).clone().to_vec(),
+                    r#type: p_conf.r#type,
+                    name: name.to_string(),
+                    mode: p_conf.mode,
+                };
+                let jpdata = serde_wasm_bindgen::to_value(&pline_conf).unwrap();
+                data.push(&jpdata);
+            } else {
+                let pline_conf = PltLineConf {
+                    x: p_conf.x,
+                    y: (*y).clone().to_vec(),
+                    r#type: p_conf.r#type,
+                    name: name.to_string(),
+                    mode: p_conf.mode,
+                };
+                let jpdata = serde_wasm_bindgen::to_value(&pline_conf).unwrap();
+                data.push(&jpdata);
+            }
+        }
+
+        let layout = PltLayout {
+            title: title,
+            width: plt_conf.width,
+            height: plt_conf.height,
+        };
+        let jlayout = serde_wasm_bindgen::to_value(&layout).unwrap();
+
+        //data.push(&jpdata);
+        new_plot(self.clone().element, &data, &jlayout);
     }
 }
 

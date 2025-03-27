@@ -116,13 +116,18 @@ pub struct Row {
     pub gridrow: vt!(GridRowElement),
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct PlotConf {
     pub x: vt!(f64),
-    pub y: vt!(f64),
-    pub name: String,
+    pub y: vvt!(f64),
+    pub x_cat: vt!(String),
+    pub y_cat: vt!(String),
+    pub names: vt!(String),
     pub mode: String,
     pub r#type: String,
+    pub title: String,
+    pub width: i64,
+    pub height: i64,
 }
 
 impl Default for PlotConf {
@@ -130,9 +135,14 @@ impl Default for PlotConf {
         PlotConf {
             x: vec![],
             y: vec![],
-            name: "".to_string(),
+            x_cat: vec![],
+            y_cat: vec![],
+            names: vec![],
             mode: "".to_string(),
             r#type: "".to_string(),
+            title: "".to_string(),
+            width: 400,
+            height: 400,
         }
     }
 }
