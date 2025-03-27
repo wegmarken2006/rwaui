@@ -147,6 +147,13 @@ impl Default for PlotConf {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct PlotLayout {
+    pub title: String,
+    pub width: i64,
+    pub height: i64,
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct RxTxMessage {
     pub text: String,

@@ -48,36 +48,36 @@ fn main() {
     let mut plt2 = get_elem("id_48");
     let mut plt3 = get_elem("id_49");
     let mut plt4 = get_elem("id_50");
-    let mut plt_data = PlotConf::default();
+
+    let layout = PlotLayout {
+        title: "test".to_string(),
+        width: 400,
+        height: 400,
+    };
+
     let y1 = vec![1.0, 2.0, 4.0, 8.0, 16.0];
     let y2 = vec![2.0, 4.0, 8.0, 16.0, 32.0];
-    plt_data.title = "Test".to_string();
-    plt_data.width = 400;
-    plt_data.height = 400;
-    plt_data.x = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-    plt_data.y.push(y1);
-    plt_data.y.push(y2);
-    plt_data.x_cat = vec![
+    let x = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+    let mut y: Vec<Vec<f64>> = vec![];
+    let names = vec!["uno".to_string(), "due".to_string()];
+    y.push(y1.clone());
+    y.push(y2.clone());
+    let xs2 = vec![
         "aa".to_string(),
         "bb".to_string(),
         "cc".to_string(),
         "dd".to_string(),
         "ee".to_string(),
     ];
-    plt_data.y_cat = plt_data.x_cat.clone();
-    plt_data.names = vec!["uno".to_string(), "due".to_string()];
-    plt_data.r#type = "scatter".to_string();
-    let mut plt2_data = plt_data.clone();
-    let mut plt3_data = plt_data.clone();
-    let mut plt4_data = plt_data.clone();
-    //plt_data.mode = "lines".to_string();
-    plt1.draw_plot(plt_data);
-    plt2_data.r#type = "bar".to_string();
-    plt2.draw_plot(plt2_data);
-    plt3_data.r#type = "line".to_string();
-    plt3.draw_plot(plt3_data);
-    plt4_data.r#type = "box".to_string();
-    plt4.draw_plot(plt4_data);
+
+    plt1.draw_plot_scatter(x.clone(), y.clone(), names.clone(), layout.clone());
+
+    plt2.draw_plot_bars(xs2, y.clone(), names.clone(), layout.clone());
+
+    plt3.draw_plot_lines(x, y.clone(), names.clone(), layout.clone());
+
+    plt4.draw_plot_box(y, names, layout);
+
     //
     if wv {
         web_view::builder()

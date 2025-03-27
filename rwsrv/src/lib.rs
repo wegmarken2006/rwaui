@@ -2,7 +2,7 @@
 extern crate mutils;
 
 mod structs;
-pub use structs::PlotConf;
+pub use structs::PlotLayout;
 use structs::*;
 
 use crossbeam_channel::Sender;
@@ -158,6 +158,79 @@ impl WsElem {
     pub fn set_list(&mut self, list: vt!(String)) {
         let mut tx_msg = RxTxMessage::default();
         tx_msg.list = list;
+        self.send_message(tx_msg);
+    }
+
+    pub fn draw_plot_lines(
+        &mut self,
+        x: vt!(f64),
+        y: vvt!(f64),
+        names: vt!(String),
+        layout: PlotLayout,
+    ) {
+        let mut tx_msg = RxTxMessage::default();
+        let mut plot_conf = PlotConf::default();
+        plot_conf.r#type = "lines".to_string();
+        plot_conf.x = x;
+        plot_conf.y = y;
+        plot_conf.names = names;
+        plot_conf.title = layout.title;
+        plot_conf.width = layout.width;
+        plot_conf.height = layout.height;
+        tx_msg.plot_conf = Some(plot_conf);
+        self.send_message(tx_msg);
+    }
+
+    pub fn draw_plot_scatter(
+        &mut self,
+        x: vt!(f64),
+        y: vvt!(f64),
+        names: vt!(String),
+        layout: PlotLayout,
+    ) {
+        let mut tx_msg = RxTxMessage::default();
+        let mut plot_conf = PlotConf::default();
+        plot_conf.r#type = "scatter".to_string();
+        plot_conf.x = x;
+        plot_conf.y = y;
+        plot_conf.names = names;
+        plot_conf.title = layout.title;
+        plot_conf.width = layout.width;
+        plot_conf.height = layout.height;
+        tx_msg.plot_conf = Some(plot_conf);
+        self.send_message(tx_msg);
+    }
+
+    pub fn draw_plot_bars(
+        &mut self,
+        x: vt!(String),
+        y: vvt!(f64),
+        names: vt!(String),
+        layout: PlotLayout,
+    ) {
+        let mut tx_msg = RxTxMessage::default();
+        let mut plot_conf = PlotConf::default();
+        plot_conf.r#type = "bar".to_string();
+        plot_conf.x_cat = x;
+        plot_conf.y = y;
+        plot_conf.names = names;
+        plot_conf.title = layout.title;
+        plot_conf.width = layout.width;
+        plot_conf.height = layout.height;
+        tx_msg.plot_conf = Some(plot_conf);
+        self.send_message(tx_msg);
+    }
+
+    pub fn draw_plot_box(&mut self, y: vvt!(f64), names: vt!(String), layout: PlotLayout) {
+        let mut tx_msg = RxTxMessage::default();
+        let mut plot_conf = PlotConf::default();
+        plot_conf.r#type = "box".to_string();
+        plot_conf.y = y;
+        plot_conf.names = names;
+        plot_conf.title = layout.title;
+        plot_conf.width = layout.width;
+        plot_conf.height = layout.height;
+        tx_msg.plot_conf = Some(plot_conf);
         self.send_message(tx_msg);
     }
 
