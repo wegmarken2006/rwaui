@@ -16,21 +16,17 @@ impl DomCfg {
 #[cfg(feature = "bulma")]
 impl Elem {
     pub fn set_elem_size(&mut self) {
-        c_log("SET SIZE 1");
         let mut c_cur = String::new();
         let mut c_new = String::new();
         c_cur = match self.element.get_attribute("class") {
             Some(c) => c,
             None => "".to_string(),
         };
-        c_log("SET SIZE 2");
         if c_cur.len() > 0 {
             c_new = format!("{} is-size-{}", c_cur, SIZE);
         } else {
             c_new = format!("is-size-{}", SIZE);
         }
-
-        c_log(&c_new);
 
         self.element.set_attribute("class", &c_new).unwrap();
     }
