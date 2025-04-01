@@ -1,10 +1,16 @@
+
 [package]
 name = "rwcln"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+bulma = []
+pico = []
+
 [lib]
 crate-type = ["cdylib", "rlib"]
+
 
 [dependencies]
 mutils = { git = "https://github.com/wegmarken2006/mutils" }

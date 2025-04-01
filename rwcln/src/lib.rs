@@ -5,9 +5,10 @@
 extern crate mutils;
 
 mod structs;
-
-use serde::Deserialize;
 use structs::*;
+
+mod css_specific;
+use css_specific::*;
 
 use serde_yml;
 
@@ -64,22 +65,14 @@ impl Elem {
     fn set_list(&mut self, list: vt!(String)) {
         sharegc!((self.dom), dom);
         let defaultind = 0;
-        let op1 = dom.create_element("", "option");
-        if list.len() > 0 {
-            self.element
-                .set_attribute("aria-label", &list[defaultind])
-                .unwrap();
-            op1.element.set_inner_html(&list[defaultind]);
-        }
-        self.element.append_child(&op1.element).unwrap();
+
         for_enum!(ind, choice, list, {
+            let op = dom.create_element("", "option");
+            op.element.set_inner_html(&choice);
             if ind == defaultind {
-                continue;
-            } else {
-                let op = dom.create_element("", "option");
-                op.element.set_inner_html(&choice);
-                self.element.append_child(&op.element).unwrap();
+                op.element.set_attribute("selected", "").unwrap();
             }
+            self.element.append_child(&op.element).unwrap();
         });
     }
 
@@ -678,17 +671,19 @@ impl DomCfg {
     }
 
     fn input(&mut self, id: &str, text: &str) -> Elem {
-        let e = self.create_element(id, "input");
+        let mut e = self.create_element(id, "input");
         e.element.set_attribute("type", "text").unwrap();
         if text.len() > 0 {
             e.element.set_attribute("placeholder", text).unwrap();
         }
+        e.set_elem_size();
         e
     }
 
     fn date(&mut self, id: &str) -> Elem {
-        let e = self.create_element(id, "input");
+        let mut e = self.create_element(id, "input");
         e.element.set_attribute("type", "date").unwrap();
+        e.set_elem_size();
         e
     }
 
@@ -701,6 +696,7 @@ impl DomCfg {
             .unwrap();
         e.set_background_color("black");
         e.set_color("white");
+        e.set_elem_size();
         e
     }
 
@@ -715,9 +711,11 @@ impl DomCfg {
         f.child_1 = Some(e_clone);
         f.append(&e);
         f.append(&b);
+        f.set_elem_size();
         f
     }
 
+    /*
     fn button(&mut self, id: &str, text: &str) -> Elem {
         let e = self.create_element(id, "button");
         e.element.set_inner_html(text);
@@ -725,10 +723,12 @@ impl DomCfg {
         e.element.set_attribute("class", "primary").unwrap();
         e
     }
+    */
 
     fn label(&mut self, id: &str, text: &str) -> Elem {
-        let e = self.create_element(id, "label");
+        let mut e = self.create_element(id, "label");
         e.element.set_inner_html(text);
+        e.set_elem_size();
         e
     }
 
@@ -742,11 +742,14 @@ impl DomCfg {
         let mut h2 = self.create_element(id, "h2");
         h2.style = format!("{} text-align: center;", h2.style);
         h2.element.set_inner_html(text);
+        h2.set_elem_size();
         h2
     }
 
     fn dropdown(&mut self, id: &str, choices: vt!(String), defaultind: usize) -> Elem {
-        let sel = self.create_element(id, "select");
+        let mut sel = self.create_element(id, "select");
+        sel.set_elem_size();
+
         let op1 = self.create_element(id, "option");
         op1.element.set_attribute("value", "").unwrap();
         if choices.len() > 0 && defaultind < choices.len() {
@@ -765,7 +768,6 @@ impl DomCfg {
                 sel.element.append_child(&op.element);
             }
         });
-
         sel
     }
 
@@ -797,13 +799,14 @@ impl DomCfg {
     }
 
     fn slider(&mut self, id: &str, min: i32, max: i32, value: i32) -> Elem {
-        let e = self.create_element(id, "input");
+        let mut e = self.create_element(id, "input");
         e.element.set_attribute("type", "range").unwrap();
         e.element.set_attribute("min", &format!("{}", min)).unwrap();
         e.element.set_attribute("max", &format!("{}", max)).unwrap();
         e.element
             .set_attribute("value", &format!("{}", value))
             .unwrap();
+        e.set_elem_size();
         e
     }
 
