@@ -16,8 +16,7 @@ use wasm_bindgen::prelude::*;
 
 use web_sys::{
     js_sys::{self, JsString},
-    window, Document, Element, HtmlInputElement, HtmlSelectElement, MessageEvent, WebSocket,
-    Window,
+    Document, Element, HtmlInputElement, HtmlSelectElement, MessageEvent, WebSocket, Window,
 };
 
 //#[wasm_bindgen(module = "/pkg/plotly/plotly-2.8.3.min.js")]
@@ -459,6 +458,7 @@ impl Elem {
         ws.send_with_u8_array(message.as_bytes()).unwrap();
     }
 
+    /*
     fn enable_this_tab(&mut self) {
         let self_clone = self.clone();
         let parent = self_clone.parent.unwrap(); // .
@@ -515,6 +515,7 @@ impl Elem {
                 .unwrap();
         }
     }
+    */
 
     fn draw_plot(&mut self, plt_conf: &mut PlotConf) {
         #[derive(serde::Serialize)]
@@ -792,11 +793,13 @@ impl DomCfg {
         e
     }
 
+    /*
     fn tab(&mut self, id: &str) -> Elem {
         let e = self.create_element(id, "div");
         e.element.set_attribute("class", "tab").unwrap();
         e
     }
+    */
 
     fn slider(&mut self, id: &str, min: i32, max: i32, value: i32) -> Elem {
         let mut e = self.create_element(id, "input");
@@ -810,6 +813,7 @@ impl DomCfg {
         e
     }
 
+    /*
     fn tab_content(&mut self, tab: &mut Elem, id: &str, title: &str) -> Elem {
         let bt = self.create_element("", "button");
         let bt_clone = bt.clone();
@@ -843,6 +847,7 @@ impl DomCfg {
 
         div2
     }
+    */
 
     fn get_new_id(&mut self) -> String {
         let id_str = format!("id_{}", self.id_count);
