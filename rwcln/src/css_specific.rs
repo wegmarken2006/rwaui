@@ -21,28 +21,22 @@ impl DomCfg {
         div1.child_1 = Some(ul1.element);
         div1
     }
-    /*
-        div1 := dom.newElem("", "div")
-     class := fmt.Sprintf("tabs %s", SIZE)
-     div1.jsValue.Call("setAttribute", "class", class)
-     ul1 := dom.newElem("", "ul")
-     div1.Append(ul1)
-     div1.child1 = ul1.jsValue
-
-     return div1
-    } */
 
     pub fn tab_content(&mut self, tab: &mut Elem, id: &str, title: &str) -> Elem {
         let li = self.create_element("", "li");
+
         let li_clone = li.clone();
-        let a = self.create_element("", "a");
+        let mut a = self.create_element("", "a");
+
         a.element.set_inner_html(title);
         li.append(&a);
-        //li.element.set_inner_html(&format!("<a>{title}</a>"));
+        a.parent = Some(Box::new(li));
 
         let mut div2 = self.create_element(id, "div");
         div2.element.set_attribute("class", "tabcontent").unwrap();
-        div2.child_1 = Some(li.element);
+        //div2.child_1 = Some(li.element);
+        div2.child_1 = Some(a.clone().element);
+        div2.child_1_b = Some(Box::new(a));
         div2.parent = Some(Box::new(tab.clone()));
         let mut div2_clone = div2.clone();
         let oc_bt = wasm_bindgen::prelude::Closure::<dyn FnMut()>::new(move || {
@@ -71,28 +65,6 @@ impl DomCfg {
         div2
     }
 }
-/*
-func (dom *Dom) Tabcontent(tab Elem, id string, title string) Elem {
-    li := dom.newElem("", "li")
-    a := dom.newElem("", "a")
-    //bt.jsValue.Call("setAttribute", "class", "tablinks outline secondary")
-    li.Append(a)
-    a.SetInnerText(title)
-    div2 := dom.newElem(id, "div")
-    div2.jsValue.Call("setAttribute", "class", "tabcontent")
-    div2.child1 = li.jsValue
-    li.OnClick(func() {
-        div2.enableThisTab()
-    })
-    div2.enableThisTabIfFirst()
-    //save Id
-    dom.tabs = append(dom.tabs, div2)
-    tab.child1.Call("appendChild", li.jsValue)
-
-    return div2
-}
-
-*/
 
 #[cfg(feature = "bulma")]
 impl Elem {
@@ -107,8 +79,13 @@ impl Elem {
             .set_attribute("style", "display: block;")
             .unwrap();
         self_clone
-            .child_1
+            //.child_1
+            //.unwrap()
+            .child_1_b
             .unwrap()
+            .parent
+            .unwrap()
+            .element
             .set_attribute("class", "is-active")
             .unwrap();
 
@@ -117,7 +94,16 @@ impl Elem {
                 tab.element
                     .set_attribute("style", "display: none;")
                     .unwrap();
-                tab.child_1.unwrap().set_attribute("class", "").unwrap();
+                tab
+                    //.child_1
+                    //.unwrap()
+                    .child_1_b
+                    .unwrap()
+                    .parent
+                    .unwrap()
+                    .element
+                    .set_attribute("class", "")
+                    .unwrap();
             }
         }
     }
@@ -134,8 +120,13 @@ impl Elem {
                 .set_attribute("style", "display: block;")
                 .unwrap();
             self_clone
-                .child_1
+                //.child_1
+                //.unwrap()
+                .child_1_b
                 .unwrap()
+                .parent
+                .unwrap()
+                .element
                 .set_attribute("class", "is-active")
                 .unwrap();
         } else {
@@ -143,8 +134,13 @@ impl Elem {
                 .set_attribute("style", "display: none;")
                 .unwrap();
             self_clone
-                .child_1
+                //.child_1
+                //.unwrap()
+                .child_1_b
                 .unwrap()
+                .parent
+                .unwrap()
+                .element
                 .set_attribute("class", "")
                 .unwrap();
         }
@@ -155,7 +151,7 @@ impl Elem {
         let mut c_new = String::new();
         c_cur = match self.element.get_attribute("class") {
             Some(c) => c,
-            None => "".to_string(),
+            None => s!(""),
         };
         if c_cur.len() > 0 {
             c_new = format!("{} is-size-{}", c_cur, SIZE);

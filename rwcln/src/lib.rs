@@ -40,6 +40,7 @@ struct Elem {
     element: Element,
     style: String,
     child_1: Option<Element>,
+    child_1_b: Option<Box<Elem>>,
     parent: Option<Box<Elem>>,
     ws_rx: Option<WebSocket>,
     ws_tx: Option<WebSocket>,
@@ -559,7 +560,7 @@ impl Elem {
         } else if plt_conf.r#type == "bar" {
             plt_conf.mode = "s".to_string();
         } else if plt_conf.r#type == "box" {
-            plt_conf.mode = "".to_string();
+            plt_conf.mode = s!(""); // "".to_string();
         }
 
         let data = js_sys::Array::new();
@@ -637,6 +638,7 @@ impl DomCfg {
             element: element,
             style: "".to_string(),
             child_1: None,
+            child_1_b: None,
             parent: None,
             ws_rx: None,
             ws_tx: None,
